@@ -9,7 +9,7 @@ services:
     dockerfilePath: ./infra/docker/Dockerfile.api
     dockerContext: .
     # الخطة المجانية بلا Background Worker، فيعمل عامل المعالجة بنفس الحاوية.
-    dockerCommand: sh -c "arq apps.api.src.workers.worker.WorkerSettings & exec uvicorn apps.api.src.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+    dockerCommand: sh apps/api/start.sh
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
