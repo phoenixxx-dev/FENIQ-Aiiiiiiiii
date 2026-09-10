@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +15,16 @@ class Settings(BaseSettings):
 
     # --- قاعدة البيانات (ميتاداتا فقط — قاعدة ذهبية #2) ---
     database_url: str = "postgresql+asyncpg://phoenix:phoenix@127.0.0.1:5432/phoenix"
+
+    @field_validator("database_url")
+    @classmethod
+    def _asyncpg_driver(cls, v: str) -> str:
+        # الاستضافات (Render وغيرها) تعطي postgres:// أو postgresql:// —
+        # SQLAlchemy غير المتزامن يحتاج اسم المشغّل صراحةً.
+        for prefix in ("postgres://", "postgresql://"):
+            if v.startswith(prefix):
+                return "postgresql+asyncpg://" + v[len(prefix):]
+        return v
 
     # --- Redis / الطابور ---
     redis_url: str = "redis://127.0.0.1:6379/0"

@@ -1,0 +1,38 @@
+# نشر تجريبي على Render المجاني — ضغطة واحدة من Blueprint.
+# ⚠️ للتجربة فقط: القرص مؤقت (الملفات تضيع عند إعادة التشغيل)، والخدمة تنام
+# بعد ١٥ دقيقة خمول، وقاعدة البيانات المجانية تنتهي بعد ~٣٠ يوماً.
+services:
+  - type: web
+    name: feniq-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./infra/docker/Dockerfile.api
+    dockerContext: .
+    # الخطة المجانية بلا Background Worker، فيعمل عامل المعالجة بنفس الحاوية.
+    dockerCommand: sh -c "arq apps.api.src.workers.worker.WorkerSettings & exec uvicorn apps.api.src.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: feniq-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: feniq-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: LOCAL_STORAGE_DIR
+        value: /tmp/phoenix-storage
+      - key: MAX_FILE_SIZE_MB
+        value: "20"
+
+  - type: keyvalue
+    name: feniq-redis
+    plan: free
+    ipAllowList: []
+
+databases:
+  - name: feniq-db
+    plan: free
