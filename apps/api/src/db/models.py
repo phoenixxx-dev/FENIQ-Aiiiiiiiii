@@ -9,8 +9,8 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import (JSON, BigInteger, DateTime, Float, ForeignKey, Index,
-                        Integer, String, Text, func)
+from sqlalchemy import (JSON, BigInteger, DateTime, Float, ForeignKey,
+                        Index, Integer, String, Text, UniqueConstraint, func)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -177,3 +177,75 @@ class AuditLog(Base):
     ip: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now())
+
+
+# ------------------------------------------------------------ مزامنة الكتالوج
+#
+# المرحلة ١: وكيل FeniqSync على جهاز المستودع يرسل كتالوج الأمين.
+# هنا ميتاداتا فقط (من، متى، كم، أين خُزِّن). الأصناف والأسعار نفسها في
+# Parquet بالتخزين — قاعدة ذهبية #2 (انظر DECISIONS.md ق-50).
+
+
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    name: Mapped[str] = mapped_column(String(255))
+    # رقم المستودع كما يرسله الوكيل في الرأس — يُثبَّت مع أول مزامنة.
+    external_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # آخر لقطة حالة (Parquet ثابت، مفتاح جديد لكل مزامنة — لا كتابة فوق القديم)
+    catalog_state_key: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    active_item_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True),
+                                                          nullable=True, index=True)
+    last_sync_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())
+
+
+class SyncToken(Base):
+    """مفتاح جهاز لكل تثبيت (ADR-001 §3ج) — لا كلمة مرور المستخدم داخل الوكيل.
+
+    نخزّن بصمة SHA-256 فقط: المفتاح عشوائي 256 بت فلا حاجة لـArgon2،
+    والبحث بالبصمة مباشر. النص الصريح يُعرض مرة واحدة عند الإنشاء.
+    """
+    __tablename__ = "sync_tokens"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    warehouse_id: Mapped[str] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    prefix: Mapped[str] = mapped_column(String(16))
+    label: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class SyncRun(Base):
+    __tablename__ = "sync_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    warehouse_id: Mapped[str] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    token_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    content_sha256: Mapped[str] = mapped_column(String(64))
+    mode: Mapped[str] = mapped_column(String(8), default="full")
+    generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    item_count: Mapped[int] = mapped_column(Integer)
+    added: Mapped[int] = mapped_column(Integer, default=0)
+    price_changed: Mapped[int] = mapped_column(Integer, default=0)
+    removed: Mapped[int] = mapped_column(Integer, default=0)
+    reactivated: Mapped[int] = mapped_column(Integer, default=0)
+    active_total: Mapped[int] = mapped_column(Integer, default=0)
+    raw_key: Mapped[str] = mapped_column(String(1024))
+    state_key: Mapped[str] = mapped_column(String(1024))
+    price_changes_key: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    dataset_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    job_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    # نفس الحمولة مرتين (إعادة محاولة بعد انقطاع) ⇒ نفس المزامنة، لا ثانية.
+    __table_args__ = (UniqueConstraint("warehouse_id", "content_sha256",
+                                       name="uq_sync_runs_warehouse_sha"),
+                      Index("ix_sync_runs_wh_received", "warehouse_id", "received_at"))
