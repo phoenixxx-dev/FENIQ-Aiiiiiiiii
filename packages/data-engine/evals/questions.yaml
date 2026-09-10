@@ -1,0 +1,107 @@
+# حزمة تقييم «اسأل فينيق» — تُشغَّل على ملف fixtures/sales_ar_messy.xlsx
+#
+# الغرض (خطة المشروع §7.5): معرفة أن تعديل البرومبت أو القاموس لم يكسر شيئاً.
+# المعيار: ≥90% دقة. بلا هذه الحزمة كل تعديل قفزة في الظلام.
+#
+# expected_tool: الأداة التي يجب أن تُختار.
+# expect_number: هل يجب أن تحوي الإجابة رقماً محسوباً؟
+# expect_unknown: أسئلة يجب أن يرفضها النظام صراحةً — الصمت هنا نجاح لا فشل.
+
+questions:
+  # --- إجماليات مباشرة ---
+  - q: "كم إجمالي المبيعات؟"
+    expected_tool: aggregate
+    expect_number: true
+  - q: "شو مجموع المبيعات"
+    expected_tool: aggregate
+    expect_number: true
+  - q: "قديش صار مجموع الاجمالي"
+    expected_tool: aggregate
+    expect_number: true
+  - q: "ما هو إجمالي المبيعات الكلي؟"
+    expected_tool: aggregate
+    expect_number: true
+  - q: "كم إجمالي الكميات المباعة؟"
+    expected_tool: aggregate
+    expect_number: true
+
+  # --- عدّ ---
+  - q: "كم عدد الصفوف؟"
+    expected_tool: count
+    expect_number: true
+  - q: "كم عدد العملاء؟"
+    expected_tool: count
+    expect_number: true
+  - q: "كم فاتورة عندي؟"
+    expected_tool: count
+    expect_number: true
+
+  # --- أعلى العناصر ---
+  - q: "مين أكتر 5 منتجات مبيعاً؟"
+    expected_tool: top_n
+    expect_number: true
+  - q: "أعلى 3 عملاء"
+    expected_tool: top_n
+    expect_number: true
+  - q: "شو أفضل المنتجات مبيعاً"
+    expected_tool: top_n
+    expect_number: true
+  - q: "مين أحسن مندوب؟"
+    expected_tool: top_n
+    expect_number: true
+  - q: "أكتر منطقة مبيعات"
+    expected_tool: top_n
+    expect_number: true
+
+  # --- السلاسل الزمنية ---
+  - q: "المبيعات حسب الشهر"
+    expected_tool: timeseries
+    expect_number: true
+  - q: "المبيعات على مدار الشهر"
+    expected_tool: timeseries
+    expect_number: true
+  - q: "شو تطور المبيعات شهرياً"
+    expected_tool: timeseries
+    expect_number: true
+
+  # --- أسئلة يجب أن تُرفض صراحةً (الصمت أصح من التخمين) ---
+  - q: "شو رأيك بالوضع بشكل عام"
+    expect_unknown: true
+  - q: "مرحبا كيفك"
+    expect_unknown: true
+  - q: "شو بدك تاكل اليوم"
+    expect_unknown: true
+  - q: "احكيلي نكتة"
+    expect_unknown: true
+
+  # --- حالات أصعب: لهجة، فلترة، مقارنة، مخزون ---
+  # أُضيفت عمداً بعد أن أعطت الحزمة الأولى 100% من أول مرة — نتيجة كاملة
+  # فوراً تعني أن الأسئلة سهلة، لا أن النظام ممتاز.
+  - q: "قديش بعنا هالشهر مقارنة بالشهر يلي قبلو"
+    expected_tool: compare_periods
+    expect_number: true
+  - q: "قارن مبيعات 5 و 6"
+    expected_tool: compare_periods
+    expect_number: true
+  - q: "شو الأصناف الراكدة؟"
+    expected_tool: stagnant_items
+  - q: "وين المخزون ناقص"
+    expected_tool: low_stock
+  - q: "أعطيني المبيعات اليومية"
+    expected_tool: timeseries
+    expect_number: true
+  - q: "كم بعنا بالسنة"
+    expected_tool: timeseries
+    expect_number: true
+  - q: "متوسط سعر الوحدة"
+    expected_tool: aggregate
+    expect_number: true
+  - q: "أعلى قيمة فاتورة"
+    expected_tool: aggregate
+    expect_number: true
+  - q: "أقل 5 منتجات مبيعاً"
+    expected_tool: top_n
+    expect_number: true
+  - q: "المبيعات حسب المنطقة"
+    expected_tool: top_n
+    expect_number: true

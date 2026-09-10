@@ -1,0 +1,37 @@
+[
+  {
+    "RowID":"D001",
+    "RawName":"Panadol Extra 500mg",
+    "CanonicalID":"P001"
+  },
+  {
+    "RowID":"D002",
+    "RawName":"PANADOL EXTRA 500 MG",
+    "CanonicalID":"P001"
+  },
+  {
+    "RowID":"D003",
+    "RawName":"Panadol-Extra 500mg",
+    "CanonicalID":"P001"
+  },
+  {
+    "RowID":"D004",
+    "RawName":"Augmentin 1g",
+    "CanonicalID":"P002"
+  },
+  {
+    "RowID":"D005",
+    "RawName":"Augmentin 1000 mg",
+    "CanonicalID":"P002"
+  },
+  {
+    "RowID":"D006",
+    "RawName":"Dermaxil Cream 30g",
+    "CanonicalID":"P003"
+  },
+  {
+    "RowID":"D007",
+    "RawName":"DermaXil cream 30 G",
+    "CanonicalID":"P003"
+  }
+]

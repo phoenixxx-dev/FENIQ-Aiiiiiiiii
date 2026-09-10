@@ -1,0 +1,8 @@
+SKU,Product,OpeningStock,Purchases,Sales,ExpectedClosing
+A100,Panadol Extra,100,75,20,155
+A101,Augmentin 1g,50,20,35,35
+A102,Vitamin C 1000,30,40,0,70
+A103,Dermaxil Cream,80,10,75,15
+A104,Sina Shampoo,25,0,25,0
+A105,Baby Bottle,10,12,0,22
+A106,Amoxicillin 500,0,5,0,5

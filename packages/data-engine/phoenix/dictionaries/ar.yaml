@@ -1,0 +1,239 @@
+# القاموس الدلالي — الطبقة الأولى في كشف معاني الأعمدة.
+# ⚠️ هذا الملف يجب أن يُوسَّع من ملفات Excel حقيقية للمستخدمين المستهدفين.
+# كل مرة يصحّح فيها المستخدم عموداً، أضف الاسم هنا.
+
+concepts:
+  invoice_no:
+    role: identifier
+    aliases_ar: [رقم الفاتورة, الفاتورة, رقم المستند, رقم الحركة, رقم السند, رقم الطلب, رقم العملية]
+    aliases_en: [invoice, invoice no, invoice number, doc no, order id, transaction id, ref]
+    expected_types: [text, identifier, integer]
+
+  date:
+    role: time
+    aliases_ar: [التاريخ, تاريخ, تاريخ الفاتورة, تاريخ الحركة, تاريخ البيع, التاريخ الميلادي, تاريخ العملية, اليوم]
+    aliases_en: [date, invoice date, order date, transaction date, day, period]
+    expected_types: [date, datetime]
+
+  product_name:
+    role: dimension
+    aliases_ar: [اسم الصنف, الصنف, المنتج, اسم المنتج, البضاعة, المادة, اسم المادة, الوصف, وصف الصنف, السلعة]
+    # name_raw = الاسم كما كتبه المحاسب في برنامج الأمين — وهو ما يعرفه المستخدم
+    aliases_en: [product, product name, item, item name, description, sku name, goods,
+                 name_raw, name raw, item_name, itemname]
+    expected_types: [text, categorical]
+
+  product_code:
+    role: identifier
+    aliases_ar: [رقم الصنف, كود الصنف, رمز المادة, كود المنتج, معرّف الصنف]
+    # item_id في الأمين هو GUID: مفتاح مستقر لا يتغيّر مع تغيّر الاسم أو السعر
+    aliases_en: [sku, item code, product code, part no, item_id, itemid, item id,
+                 material id, mat_guid, guid]
+    expected_types: [text, identifier, integer]
+
+  quantity:
+    role: measure
+    aliases_ar: [الكمية, كمية, العدد, عدد, الكميه, الكمية المباعة, كمية البيع, عدد القطع, الكمية المطلوبة]
+    aliases_en: [qty, quantity, units, count, pieces, volume]
+    expected_types: [integer, float]
+    unit: piece
+
+  unit_price:
+    role: measure
+    aliases_ar: [سعر الوحدة, السعر, سعر, سعر البيع, السعر الإفرادي, سعر القطعة, سعر المفرد, التكلفة]
+    aliases_en: [price, unit price, rate, cost, unit cost]
+    expected_types: [float, integer]
+    unit: currency
+
+  total_amount:
+    role: measure
+    aliases_ar: [الإجمالي, الاجمالي, المجموع, القيمة, المبلغ, صافي المبلغ, الإجمالي بعد الخصم, إجمالي المبلغ, قيمة الفاتورة]
+    aliases_en: [total, amount, revenue, net, subtotal, grand total, line total, sales, recorded total, record total]
+    expected_types: [float, integer]
+    unit: currency
+    # ⚠️ "sales"/"مبيعات" وحدها كلمة مزدوجة المعنى: ممكن تعني مبلغاً مالياً (مبيعات
+    # اليوم = 5,000,000 ر.س) أو عدد وحدات مباعة (مبيعات الصنف = 155 قطعة) — القاموس
+    # وحده ما يحسم. أي عمود اسمه يطابق هالكلمات تحديداً، ولا يوجد بالملف أي دليل مستقل
+    # آخر (عمود مالي مؤكَّد، أو تحقق كمية×سعر=إجمالي) يؤكد أنه مبلغ، يُترك بلا تصنيف
+    # بدل جواب واثق بعملة خاطئة (راجع semantic._guard_ambiguous_money_columns).
+    ambiguous_aliases_ar: [مبيعات, المبيعات]
+    ambiguous_aliases_en: [sales]
+
+  discount:
+    role: measure
+    aliases_ar: [الخصم, خصم, نسبة الخصم, قيمة الخصم]
+    aliases_en: [discount, disc, rebate]
+    expected_types: [float, integer]
+
+  customer:
+    role: dimension
+    aliases_ar: [العميل, الزبون, اسم العميل, اسم الزبون, الحساب, اسم الحساب, الجهة, الزبائن, العملاء,
+                 اسم الصيدلية, الصيدلية, الصيدليات, اسم الجهة, اسم المشتري, المشتري, نقطة البيع, المركز]
+    aliases_en: [customer, client, account, buyer, customer name]
+    expected_types: [text, categorical]
+
+  salesperson:
+    role: dimension
+    aliases_ar: [المندوب, البائع, الموظف, اسم المندوب, المسوق, مندوب المبيعات, الكاشير]
+    aliases_en: [salesperson, sales rep, rep, agent, employee, seller, cashier]
+    expected_types: [text, categorical]
+
+  region:
+    role: dimension
+    aliases_ar: [المنطقة, المنطقه, المدينة, الفرع, المحافظة, الموقع, المناطق, البلد]
+    aliases_en: [region, city, branch, area, location, governorate, country]
+    expected_types: [text, categorical]
+
+  category:
+    role: dimension
+    aliases_ar: [التصنيف, الفئة, المجموعة, النوع, القسم, تصنيف الصنف]
+    aliases_en: [category, group, type, class, department, segment]
+    expected_types: [text, categorical]
+
+  payment_method:
+    role: dimension
+    aliases_ar: [طريقة الدفع, نوع الدفع, الدفع, وسيلة الدفع]
+    aliases_en: [payment method, payment type, payment]
+    expected_types: [text, categorical]
+
+  supplier:
+    role: dimension
+    aliases_ar: [المورد, اسم المورد, الشركة, الشركة الصانعة, المصنع, الشركة المصنعة, الصانع]
+    aliases_en: [supplier, vendor, manufacturer, company, maker, brand]
+    expected_types: [text, categorical]
+
+  stock_qty:
+    role: measure
+    aliases_ar: [الرصيد, رصيد المخزون, الكمية المتوفرة, المخزون, الموجود, الرصيد الحالي,
+                 الكمية المتوفرة في المستودع, المتوفر, كمية المخزون, رصيد الصنف,
+                 المخزون الحالي, الرصيد المتوفر, الكمية بالمستودع]
+    aliases_en: [stock, balance, on hand, inventory, available qty, stock_qty,
+                 qty on hand, closing balance]
+    expected_types: [integer, float]
+
+  barcode:
+    role: identifier
+    # الباركود مفتاحٌ عالمي للصنف — يفصل الأصناف المتشابهة الأسماء بلا لبس
+    aliases_ar: [الباركود, باركود, الرمز الشريطي, رقم الباركود]
+    aliases_en: [barcode, ean, upc, gtin, bar code]
+    expected_types: [text, identifier, integer]
+
+  name_variant:
+    role: identifier
+    # FeniqSync يصدّر الاسم أربع مرات: خام، ومنظّف، ومجرّد، وبدائل. واحدٌ منها
+    # فقط يُعرض للمستخدم (name_raw)؛ الباقي أدوات مطابقة. لولا تمييزها لظهرت
+    # «أعلى المنتجات» أربع مرات بأربعة تجميعات مختلفة لنفس البيانات.
+    aliases_ar: [الاسم المطبّع, الاسم المجرد, بدائل الاسم, الاسم البديل, مرادفات الاسم]
+    aliases_en: [name_norm, name norm, name_core, name core, name_latin, name latin,
+                 aliases, alias, alt name, name_alt, normalized name]
+    expected_types: [text, categorical, identifier]
+
+  unit:
+    role: dimension
+    # وحدة القياس (قطعة، علبة، شريط، كغ). تُقرأ ولا تُجمع أبداً.
+    aliases_ar: [الوحدة, وحدة القياس, الوحده, وحدة البيع, العبوة]
+    aliases_en: [unit, uom, unit of measure, unit_raw, packaging]
+    expected_types: [text, categorical]
+
+  dosage_form:
+    role: dimension
+    # الشكل الصيدلاني (أقراص، شراب، حقن…). عمود فارغ عمداً في FeniqSync: لا
+    # نفترض ما ليس موجوداً في الأمين — عمودٌ نصفه خاطئ أسوأ من عمود فارغ.
+    aliases_ar: [الشكل الصيدلاني, الشكل, شكل الدواء, الشكل الدوائي]
+    aliases_en: [form, dosage form, dosage_form, formulation]
+    expected_types: [text, categorical]
+
+  strength:
+    role: dimension
+    # العيار (500 ملغ). صفةُ صنف لا مقياس — «مجموع العيارات» بلا معنى.
+    aliases_ar: [العيار, التركيز, الجرعة, عيار الدواء]
+    aliases_en: [strength, dose, concentration, potency]
+    expected_types: [text, categorical]
+
+  warehouse:
+    role: dimension
+    aliases_ar: [المستودع, المخزن, اسم المستودع, رقم المستودع, الفرع]
+    aliases_en: [warehouse, store, store id, warehouse_id, storeguid, branch]
+    expected_types: [text, categorical, identifier]
+
+  expiry_date:
+    role: time
+    aliases_ar: [تاريخ الصلاحية, الصلاحية, تاريخ الانتهاء, انتهاء الصلاحية]
+    aliases_en: [expiry, expiry date, expiration, best before]
+    expected_types: [date]
+
+  notes:
+    role: dimension
+    aliases_ar: [ملاحظات, ملاحظة, البيان, تفاصيل, وصف إضافي]
+    aliases_en: [notes, note, remarks, comment, details]
+    expected_types: [text]
+
+  reorder_level:
+    role: measure
+    aliases_ar: [حد الطلب, الحد الأدنى, حد إعادة الطلب, نقطة الطلب, الحد الادنى للمخزون]
+    aliases_en: [reorder level, min stock, reorder point, safety stock]
+    expected_types: [integer, float]
+
+  # ⚠️ تعمّدنا عدم إضافة "opening"/"closing"/"balance"/"افتتاحي" لوحدها كمرادفات:
+  # هالكلمات شائعة كتير بمعنى مالي (رصيد افتتاحي/ختامي لحساب، لا لصنف) — عيب مشابه
+  # تماماً لعيب "Sales" (راجع total_amount.ambiguous_aliases). لازم الكلمة تحديداً
+  # تذكر "stock" حتى ننسبها لمخزون فعلاً.
+  opening_stock:
+    role: measure
+    aliases_ar: [الرصيد الافتتاحي, رصيد افتتاحي, المخزون الافتتاحي, الكمية الافتتاحية]
+    aliases_en: [opening stock, beginning stock]
+    expected_types: [integer, float]
+    unit: piece
+
+  closing_stock:
+    role: measure
+    aliases_ar: [الرصيد الختامي, المخزون الختامي, الرصيد المتوقع, رصيد الإقفال]
+    aliases_en: [closing stock, expected closing, ending stock]
+    expected_types: [integer, float]
+    unit: piece
+
+  purchases:
+    role: measure
+    aliases_ar: [المشتريات, مشتريات, كمية الشراء, الوارد, الكمية الواردة]
+    aliases_en: [purchases, purchase, received, receipts, incoming]
+    expected_types: [integer, float]
+    unit: piece
+
+  collected_amount:
+    role: measure
+    aliases_ar: [المحصل, المبلغ المحصل, التحصيل, المحصّل, المبالغ المحصلة, المحصلات, الدفعات, المدفوعات, دفعات]
+    aliases_en: [collected, amount collected, collections, received amount, cash collected, payments, payment]
+    expected_types: [integer, float]
+    unit: currency
+
+  outstanding_amount:
+    role: measure
+    aliases_ar: [المستحق, الرصيد المستحق, الذمم, المديونية, الدين, المتبقي, المبلغ المتبقي, المبلغ المستحق,
+                 الدين الافتتاحي, دين افتتاحي]
+    aliases_en: [outstanding, balance due, receivable, amount due, remaining balance, opening debt, beginning debt]
+    expected_types: [integer, float]
+    unit: currency
+
+  margin_percentage:
+    role: measure
+    aliases_ar: [نسبة الهامش, هامش الربح, نسبة الربح, الهامش]
+    aliases_en: [margin, margin pct, margin percentage, profit margin]
+    expected_types: [integer, float]
+    unit: percent
+
+  # ⚠️ يسمح بالسؤال عن سعر الصرف نفسه إذا كان عموداً بالملف (مثل 04_exchange_rates.csv).
+  # هذا لا يحل "فخّ العملة" (مطابقة معاملة بتاريخها بسعر يوم محدد من ملف تاني) —
+  # هاي تحتاج قدرة مقارنة/ربط بين ملفات، قرار منفصل لسا ما اتخذ.
+  currency:
+    role: dimension
+    # عمود العملة أهم عمود في ملف سوري: بلا معرفة العملة لكل صف، جمعُ الدولار
+    # مع الليرة يعطي رقماً بلا معنى يبدو سليماً تماماً.
+    aliases_ar: [العملة, عملة, نوع العملة, العمله, عمله, وحدة النقد]
+    aliases_en: [currency, cur, ccy, currency code, curr]
+    expected_types: [text, categorical]
+
+  exchange_rate:
+    role: measure
+    aliases_ar: [سعر الصرف, سعر صرف, سعر الدولار, سعر العملة]
+    aliases_en: [exchange rate, fx rate, currency rate, syp per usd, syp_per_usd, usd rate]
+    expected_types: [integer, float]

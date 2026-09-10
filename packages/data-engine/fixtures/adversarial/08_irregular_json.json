@@ -1,0 +1,42 @@
+{
+  "warehouse": "Al-Najah",
+  "period": "2026-08",
+  "sales": [
+    {
+      "sku": "A100",
+      "name": "Panadol Extra",
+      "qty": 100,
+      "price": 12500
+    },
+    {
+      "sku": "A101",
+      "name": "Augmentin 1g",
+      "qty": "50",
+      "price": 38000
+    },
+    {
+      "sku": "A102",
+      "name": "Vitamin C",
+      "quantity": 30,
+      "price": 9000
+    },
+    {
+      "sku": "A103",
+      "name": "Dermaxil",
+      "qty": null,
+      "price": 22000
+    },
+    {
+      "sku": "A104",
+      "name": "Baby Bottle",
+      "qty": -4,
+      "price": 15000
+    },
+    {
+      "sku": "A105",
+      "name": "Mystery",
+      "qty": 10,
+      "price": "N/A"
+    }
+  ]
+}

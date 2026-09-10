@@ -1,0 +1,26 @@
+# --- API ---
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+email-validator
+python-multipart
+sqlalchemy
+alembic
+asyncpg
+redis
+arq
+boto3
+passlib[argon2]
+python-jose[cryptography]
+# --- محرك البيانات ---
+polars
+duckdb
+pyarrow
+fastexcel
+sqlglot
+pyyaml
+# --- الاختبارات ---
+pytest
+pytest-asyncio
+httpx

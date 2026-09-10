@@ -1,0 +1,23 @@
+[
+  {
+    "CustomerID":"C01",
+    "Customer":"صيدلية الشفاء",
+    "OpeningDebt":1000000,
+    "Payments":500000,
+    "NewSales":750000
+  },
+  {
+    "CustomerID":"C02",
+    "Customer":"صيدلية الحياة",
+    "OpeningDebt":500000,
+    "Payments":100000,
+    "NewSales":100000
+  },
+  {
+    "CustomerID":"C03",
+    "Customer":"صيدلية النور",
+    "OpeningDebt":200000,
+    "Payments":0,
+    "NewSales":100000
+  }
+]

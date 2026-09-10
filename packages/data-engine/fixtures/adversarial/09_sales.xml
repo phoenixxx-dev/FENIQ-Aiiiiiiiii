@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<warehouse period="2026-08">
+  <sale id="S01"><sku>A100</sku><product>Panadol Extra</product><qty>100</qty><unit_price>12500</unit_price></sale>
+  <sale id="S02"><sku>A101</sku><product>Augmentin 1g</product><qty>50</qty><unit_price>38000</unit_price></sale>
+  <sale id="S03"><sku>A102</sku><product>Vitamin C</product><qty>30</qty><unit_price>9000</unit_price></sale>
+  <sale id="S04"><sku>A103</sku><product>Dermaxil</product><qty>-2</qty><unit_price>22000</unit_price></sale>
+  <sale id="S05"><sku>A104</sku><product>Baby Bottle</product><qty>15</qty><unit_price>15000</unit_price></sale>
+</warehouse>

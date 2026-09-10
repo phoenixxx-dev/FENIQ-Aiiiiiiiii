@@ -1,0 +1,20 @@
+[
+  {
+    "CustomerID":"P001",
+    "Customer":"صيدلية الشفاء",
+    "Phone":"0933123456",
+    "City":"Latakia"
+  },
+  {
+    "CustomerID":"P002",
+    "Customer":"صيدلية الحياة",
+    "Phone":"0933987654",
+    "City":"Latakia"
+  },
+  {
+    "CustomerID":"P003",
+    "Customer":"صيدلية النور",
+    "Phone":"0933555123",
+    "City":"Latakia"
+  }
+]

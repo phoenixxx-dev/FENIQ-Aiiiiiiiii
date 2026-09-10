@@ -1,0 +1,19 @@
+# تبعيات ومخرجات تتولّد تلقائياً — لا تُرفع
+node_modules/
+.next/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# أسرار — لا تُرفع أبداً
+.env
+*.env
+!.env.example
+
+# مخرجات اختبار/بنش مارك محلية — ليست كوداً
+artifacts/
+
+# بيانات عمل حقيقية (أسعار فعلية من الأمين) — تُضاف لاحقاً لما يصير المستودع خاص
+packages/data-engine/fixtures/real/
