@@ -233,6 +233,21 @@ class TestIsolationAndSecrets:
         assert ds.user_id == wh.user_id
 
     @pytest.mark.asyncio
+    async def test_token_list_shows_state_but_never_the_secret(self, client):
+        auth, wh, tid, agent = await setup_wh(client)
+        await push(client, agent, catalog(BASE))
+        await client.delete(f"/v1/warehouses/{wh}/tokens/{tid}", headers=auth)
+        rows = (await client.get(f"/v1/warehouses/{wh}/tokens", headers=auth)).json()
+        assert len(rows) == 1
+        row = rows[0]
+        assert row["last_used_at"] and row["revoked_at"], row
+        secret = agent["Authorization"].split()[1]
+        assert secret not in str(rows) and row["prefix"] == secret[:10]
+        other = await owner(client)
+        assert (await client.get(f"/v1/warehouses/{wh}/tokens",
+                                 headers=other)).status_code == 404
+
+    @pytest.mark.asyncio
     async def test_plaintext_token_is_never_stored(self, client):
         _, _, tid, agent = await setup_wh(client)
         token = agent["Authorization"].split()[1]

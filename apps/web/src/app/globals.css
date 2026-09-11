@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* نظام التصميم — القيم من خطة المشروع §8.3 حرفياً، لم نخترع هوية جديدة. */
+@theme {
+  --color-phoenix-50: #fff4e6;
+  --color-phoenix-100: #ffe3c2;
+  --color-phoenix-500: #e8590c;
+  --color-phoenix-600: #d9480f;
+  /* phoenix-700 هو لون الأزرار المملوءة: الأبيض على phoenix-500 يعطي
+     3.58:1 ويرسب في WCAG AA للنص العادي (كشفه axe-core). نفس درجة اللون،
+     أغمق قليلاً، 5.6:1. و phoenix-500 يبقى للحدود وشريط التقدّم. */
+  --color-phoenix-700: #b93e0d;
+
+  --color-ink-900: #0f172a;
+  --color-ink-700: #334155;
+  --color-ink-600: #475569;
+  /* ⚠️ #94a3b8 كان يرسب في تباين WCAG AA (2.85:1) — كشفه فحص axe-core.
+     #64748b يعطي 4.8:1 على الأبيض ويبقى «نصاً ثانوياً» بصرياً. */
+  --color-ink-400: #64748b;
+
+  --color-surface: #ffffff;
+  --color-canvas: #f8fafc;
+  --color-line: #e2e8f0;
+
+  --color-ok: #16a34a;
+  /* نسخة نصّية: الأصلية (3.3:1) ترسب في WCAG AA — تصلح للأيقونات لا للكلمات */
+  --color-ok-700: #15803d;
+  --color-warn: #d97706;
+  /* نسخة داكنة للنص الصغير: الأصلية تصلح للحدود والأيقونات لا للكلمات */
+  --color-warn-700: #b45309;
+  --color-danger: #dc2626;
+
+  --font-sans: "IBM Plex Sans Arabic", system-ui, "Segoe UI", sans-serif;
+}
+
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink-900);
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* الأرقام تبقى LTR داخل النص العربي — بدون هذا تنقلب خانات المبالغ */
+/* عزل الأرقام عن اتجاه الفقرة العربية.
+   ⚠️ بلا display: كانت inline-block تجعل أي <p> أو <td> يحمل الصنف عنصراً
+   سطرياً، فيلتصق زر «كيف حُسب؟» بالرقم في بطاقة المؤشر. العزل نفسه يتحقق
+   بـunicode-bidi وحده. */
+.num {
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* قيمة = رقم + وحدة عربية («1,880,947.36 ر.س»).
+   ⚠️ لا تستعمل .num هنا: فرض direction:ltr يقلب الترتيب البصري فتُعرض
+   «ر.س» **يمين** الرقم، أي يقرؤها العربي أولاً — والشكل الصحيح أن يأتي
+   الرقم أولاً (يميناً) ثم الوحدة يساره. قِيس فعلياً بالمتصفح: مع .num
+   كان الرقم عند x=205 والعملة عند x=327 (مقلوب)، وبالعزل وحده صار الرقم
+   عند 250 والعملة عند 205 (صحيح). العزل يكفي، وفرض الاتجاه ضارّ. */
+.numval {
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: isolate;
+}
+
+/* الأيقونة الاتجاهية تنقلب مع اتجاه الصفحة */
+[dir="rtl"] .flip {
+  transform: scaleX(-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* نص لقارئ الشاشة فقط — التمييز اللوني وحده لا يصل لمن لا يميّز الألوان */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

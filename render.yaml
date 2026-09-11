@@ -27,6 +27,21 @@ services:
         value: /tmp/phoenix-storage
       - key: MAX_FILE_SIZE_MB
         value: "20"
+      # الواجهة على نطاق آخر — بدون هذا يرفض المتصفح كل طلب (CORS)
+      - key: CORS_ORIGINS
+        value: https://feniq-web.onrender.com
+
+  # الواجهة (Next.js). رابط الـAPI يُحقن وقت البناء (NEXT_PUBLIC_*).
+  - type: web
+    name: feniq-web
+    runtime: node
+    plan: free
+    rootDir: apps/web
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE
+        value: https://feniq-api.onrender.com
 
   - type: keyvalue
     name: feniq-redis

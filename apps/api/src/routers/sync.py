@@ -8,6 +8,7 @@
     GET    /v1/warehouses
     POST   /v1/warehouses/{id}/tokens
     DELETE /v1/warehouses/{id}/tokens/{token_id}
+    GET    /v1/warehouses/{id}/tokens
     GET    /v1/warehouses/{id}/syncs
 
 تسلسل الاستقبال:
@@ -81,6 +82,16 @@ class TokenOut(BaseModel):
     prefix: str
     # يُعرض مرة واحدة فقط — لا نحفظه ولا نستطيع إظهاره لاحقاً.
     token: str
+
+
+class TokenInfo(BaseModel):
+    """ما يُعرض عن مفتاح بعد إنشائه — البادئة للتعرّف عليه، لا المفتاح نفسه."""
+    token_id: str
+    prefix: str
+    label: str | None
+    created_at: datetime
+    last_used_at: datetime | None
+    revoked_at: datetime | None
 
 
 class SyncStats(BaseModel):
@@ -162,6 +173,16 @@ async def create_token(warehouse_id: str, body: TokenIn, user: CurrentUser,
                  ip=client_ip(request))
     await db.commit()
     return TokenOut(token_id=t.id, prefix=t.prefix, token=token)
+
+
+@router.get("/warehouses/{warehouse_id}/tokens", response_model=list[TokenInfo])
+async def list_tokens(warehouse_id: str, user: CurrentUser, db: SessionDep) -> list[TokenInfo]:
+    w = await _own_warehouse(warehouse_id, user, db)
+    res = await db.execute(select(SyncToken).where(SyncToken.warehouse_id == w.id)
+                           .order_by(SyncToken.created_at.desc()))
+    return [TokenInfo(token_id=t.id, prefix=t.prefix, label=t.label, created_at=t.created_at,
+                      last_used_at=t.last_used_at, revoked_at=t.revoked_at)
+            for t in res.scalars()]
 
 
 @router.delete("/warehouses/{warehouse_id}/tokens/{token_id}", status_code=204)
