@@ -18,7 +18,7 @@ from .db.session import create_all, dispose_engine
 from .security.rate_limit import limit_general
 from .observability import (REQUEST_ID_HEADER, RequestContextMiddleware,
                             configure_logging, current_request_id)
-from .routers import analysis, ask, auth, datasets, health, jobs, sync, uploads
+from .routers import alerts, analysis, ask, auth, datasets, health, jobs, sync, uploads
 
 configure_logging()
 
@@ -66,6 +66,7 @@ app.include_router(analysis.router, dependencies=_general)
 app.include_router(ask.router, dependencies=_general)
 # المزامنة لها حدّها الخاص لكل مفتاح جهاز (داخل المسار) إضافةً للحد العام.
 app.include_router(sync.router, dependencies=_general)
+app.include_router(alerts.router, dependencies=_general)
 
 
 @app.exception_handler(StarletteHTTPException)

@@ -30,6 +30,14 @@ services:
       # الواجهة على نطاق آخر — بدون هذا يرفض المتصفح كل طلب (CORS)
       - key: CORS_ORIGINS
         value: https://feniq-web.onrender.com
+      # المرحلة ٢ — تُدخل يدوياً من لوحة Render (لا تُكتب هنا ولا بالمحادثة)
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
+      # نفس القيمة تُوضع سرّاً باسم CRON_SECRET بإعدادات ريبو GitHub
+      - key: CRON_SECRET
+        generateValue: true
 
   # الواجهة (Next.js). رابط الـAPI يُحقن وقت البناء (NEXT_PUBLIC_*).
   - type: web

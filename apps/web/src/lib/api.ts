@@ -53,6 +53,9 @@ export type TokenOut =
 export type SyncRunOut =
   paths["/v1/warehouses/{warehouse_id}/syncs"]["get"]["responses"][200]["content"]["application/json"][number];
 
+export type TelegramStatus =
+  paths["/v1/alerts/telegram"]["get"]["responses"][200]["content"]["application/json"];
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -443,6 +446,13 @@ export const api = {
     request<void>(`/v1/warehouses/${warehouseId}/tokens/${tokenId}`, { method: "DELETE" }),
   listSyncs: (warehouseId: string) =>
     request<SyncRunOut[]>(`/v1/warehouses/${warehouseId}/syncs?limit=10`),
+  // --- تنبيهات تيليغرام (المرحلة ٢) ---
+  telegramStatus: () => request<TelegramStatus>("/v1/alerts/telegram"),
+  telegramLink: () =>
+    request<{ url: string }>("/v1/alerts/telegram/link", { method: "POST" }),
+  telegramVerify: () =>
+    request<TelegramStatus>("/v1/alerts/telegram/verify", { method: "POST" }),
+  telegramUnlink: () => request<void>("/v1/alerts/telegram", { method: "DELETE" }),
   syncEndpoint: () => `${API_BASE}/v1/sync/catalog`,
 
   exportUrl: (id: string, fmt: "csv" | "xlsx") =>

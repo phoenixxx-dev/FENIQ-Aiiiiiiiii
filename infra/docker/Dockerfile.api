@@ -9,6 +9,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY packages/ ./packages/
 COPY apps/ ./apps/
+# الهجرات تُطبَّق عند الإقلاع (apps/api/start.sh)
+COPY alembic.ini ./
+COPY infra/migrations/ ./infra/migrations/
 
 EXPOSE 8000
 CMD ["uvicorn", "apps.api.src.main:app", "--host", "0.0.0.0", "--port", "8000"]

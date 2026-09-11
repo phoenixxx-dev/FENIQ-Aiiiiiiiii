@@ -48,6 +48,8 @@ function Warehouses() {
         <p className="mt-1 text-sm text-ink-600">{t("warehouse.intro")}</p>
       </section>
 
+      <TelegramCard />
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -281,6 +283,82 @@ function Syncs({ warehouseId }: { warehouseId: string }) {
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+/**
+ * ربط تيليغرام بخطوتين: رابط t.me يحمل رمزاً مؤقتاً ← «ضغطت Start» فيقرأ الخادم
+ * رسائل البوت ويطابق الرمز. لا webhook ولا لصق أرقام محادثة يدوياً.
+ */
+function TelegramCard() {
+  const qc = useQueryClient();
+  const { data } = useQuery({ queryKey: ["telegram"], queryFn: api.telegramStatus });
+  const [opened, setOpened] = useState(false);
+  const [missed, setMissed] = useState(false);
+  const link = useMutation({
+    mutationFn: api.telegramLink,
+    onSuccess: ({ url }) => {
+      window.open(url, "_blank", "noopener");
+      setOpened(true);
+      setMissed(false);
+    },
+  });
+  const verify = useMutation({
+    mutationFn: api.telegramVerify,
+    onSuccess: (st) => {
+      qc.setQueryData(["telegram"], st);
+      setMissed(!st.linked);
+      if (st.linked) setOpened(false);
+    },
+  });
+  const unlink = useMutation({
+    mutationFn: api.telegramUnlink,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["telegram"] }),
+  });
+
+  if (!data) return null;
+  return (
+    <section className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
+      <h2 className="font-semibold">{t("telegram.title")}</h2>
+      <p className="text-xs text-ink-600">{t("telegram.explain")}</p>
+      {!data.configured ? (
+        <p className="text-xs text-ink-400">{t("telegram.notConfigured")}</p>
+      ) : data.linked ? (
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm text-ok-700">{t("telegram.linked")}</span>
+          <button
+            onClick={() => unlink.mutate()}
+            className="rounded px-2 py-1 text-xs text-ink-400 hover:text-danger"
+          >
+            {t("telegram.unlink")}
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => link.mutate()}
+            disabled={link.isPending}
+            className="self-start rounded-lg bg-phoenix-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          >
+            {t("telegram.connect")}
+          </button>
+          {opened && (
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span>{t("telegram.step")}</span>
+              <button
+                onClick={() => verify.mutate()}
+                disabled={verify.isPending}
+                className="rounded-lg border border-phoenix-500 px-3 py-1.5 font-semibold text-phoenix-700 disabled:opacity-40"
+              >
+                {verify.isPending ? t("telegram.checking") : t("telegram.verify")}
+              </button>
+            </div>
+          )}
+          {missed && <p className="text-xs text-warn-700">{t("telegram.notYet")}</p>}
+        </div>
+      )}
+      <ErrorLine error={link.error ?? verify.error} />
     </section>
   );
 }

@@ -38,10 +38,11 @@ from sqlalchemy import select
 from phoenix.catalog_sync import CatalogPayloadError, merge_catalog, parse_catalog
 
 from ..config import get_settings
-from ..db.models import Dataset, Job, SyncRun, SyncToken, Warehouse
+from ..db.models import Dataset, Job, SyncRun, SyncToken, User, Warehouse
 from ..deps import CurrentUser, SessionDep
 from ..security.rate_limit import client_ip, enforce
 from ..services.audit import record
+from ..services.stale import notify_recovered
 from ..storage.client import get_storage, raw_key
 from ..workers.queue import enqueue_processing
 
@@ -344,6 +345,11 @@ async def sync_catalog(request: Request, db: SessionDep,
     await db.flush()
     run.dataset_id, run.job_id = ds.id, job.id
 
+    # كان منقطعاً وأُرسل تنبيه ⇒ نمسح الختم ونبشّر بالعودة (بعد الحفظ).
+    recovered = wh.stale_alerted_at is not None
+    wh.stale_alerted_at = None
+    owner = await db.get(User, wh.user_id) if recovered else None
+    recovered_to = (owner.telegram_chat_id, wh.name) if owner else None
     wh.catalog_state_key = run.state_key
     wh.active_item_count = result.stats.active_total
     wh.last_sync_at = now
@@ -354,4 +360,6 @@ async def sync_catalog(request: Request, db: SessionDep,
     await db.commit()
 
     await enqueue_processing(job.id)
+    if recovered_to:
+        await notify_recovered(*recovered_to)
     return _run_out(run, False)

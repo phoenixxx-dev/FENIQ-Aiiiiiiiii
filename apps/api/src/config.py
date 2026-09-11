@@ -64,6 +64,20 @@ class Settings(BaseSettings):
         """الطبقة لا تعمل إلا بمفتاح فعلي — لا تفعيل نصف مكتمل."""
         return self.ai_layer_enabled and bool(self.gemini_api_key)
 
+    # --- تنبيهات انقطاع المزامنة (المرحلة ٢) ---
+    # بوت تيليغرام: التوكن يُضبط من لوحة الاستضافة فقط، لا بالكود ولا بالمحادثة.
+    telegram_bot_token: str = ""
+    telegram_bot_username: str = ""
+    # سرّ نقطة الفحص الدوري — المنبّه الخارجي (GitHub Actions) يرسله بترويسة.
+    # فارغ = النقطة معطّلة (لا فحص بلا سر).
+    cron_secret: str = ""
+    # مزامنة يومية + هامش ساعتين (قرار عمار).
+    stale_after_hours: int = 26
+
+    @property
+    def telegram_ready(self) -> bool:
+        return bool(self.telegram_bot_token and self.telegram_bot_username)
+
     # --- الحدود ---
     max_file_size_mb: int = 100
     # سجلات رفع لم يُستكمل (طُلب رابط ولم يصل الملف) تُنظَّف بعد هذه المدة.

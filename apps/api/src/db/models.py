@@ -30,6 +30,10 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     locale: Mapped[str] = mapped_column(String(8), default="ar")
+    # تنبيهات تيليغرام: محادثة المستخدم مع البوت، ورمز ربط مؤقت يُرسل عبر /start
+    telegram_chat_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    telegram_link_code: Mapped[str | None] = mapped_column(String(32), nullable=True,
+                                                          index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now())
 
@@ -200,6 +204,9 @@ class Warehouse(Base):
     last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True),
                                                           nullable=True, index=True)
     last_sync_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # متى أُرسل تنبيه الانقطاع — يمنع التكرار كل ساعة، ويُمسح عند عودة المزامنة
+    stale_alerted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True),
+                                                              nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now())
 
