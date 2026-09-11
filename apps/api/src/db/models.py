@@ -59,6 +59,9 @@ class Dataset(Base):
     content_sha256: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
     # نفس الملف رُفع سابقاً؟ نشير للسجل الأقدم بدل منع الرفع — القرار للمستخدم.
     duplicate_of: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # ملف أنشأته مزامنة مستودع (لا رفع يدوي). «ملفاتي» تعرض أحدثه فقط لكل
+    # مستودع — مزامنة يومية كانت ستُغرق القائمة بثلاثين ملفاً شهرياً.
+    warehouse_id: Mapped[str | None] = mapped_column(String(36), index=True, nullable=True)
     warnings_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
     # تصحيحات المستخدم لأدوار الأعمدة — تُعاد مع كل معالجة، فقراره لا يضيع.
     schema_overrides_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)

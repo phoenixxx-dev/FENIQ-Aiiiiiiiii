@@ -220,7 +220,8 @@
     "added": "أُضيف",
     "priceChanged": "تغيّر سعره",
     "removed": "غاب",
-    "duplicate": "مكرّرة"
+    "duplicate": "مكرّرة",
+    "openLatest": "افتح آخر تحليل"
   },
   "telegram": {
     "title": "تنبيهات تيليغرام",

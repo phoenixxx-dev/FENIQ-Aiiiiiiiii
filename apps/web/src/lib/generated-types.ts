@@ -1346,6 +1346,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Latest Dataset Id */
+            latest_dataset_id?: string | null;
         };
         /** TokenOut */
         apps__api__src__routers__auth__TokenOut: {

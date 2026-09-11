@@ -7,7 +7,7 @@ from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .db.models import Dataset, User
+from .db.models import Dataset, SyncRun, User, Warehouse
 from .db.session import get_session
 from .security.auth import ACCESS, decode_token
 
@@ -54,10 +54,15 @@ async def get_user_dataset(dataset_id: str, user: User, db: AsyncSession) -> Dat
 async def list_user_datasets(user: User, db: AsyncSession) -> list[Dataset]:
     # awaiting_upload / uploaded = سجل محجوز لم تبدأ معالجته بعد. عرضه
     # للمستخدم يعني صفاً فارغاً لا يفتح — فنخفيه حتى تبدأ المعالجة فعلاً.
+    # ملفات المزامنة: أحدثها فقط لكل مستودع (الأقدم يبقى متاحاً برابطه وسجلّه).
+    latest_synced = (select(SyncRun.dataset_id)
+                     .join(Warehouse, Warehouse.last_sync_id == SyncRun.id)
+                     .where(Warehouse.user_id == user.id))
     res = await db.execute(
         select(Dataset)
         .where(Dataset.user_id == user.id,
-               Dataset.status.notin_(("awaiting_upload", "uploaded")))
+               Dataset.status.notin_(("awaiting_upload", "uploaded")),
+               Dataset.warehouse_id.is_(None) | Dataset.id.in_(latest_synced))
         .order_by(Dataset.created_at.desc())
     )
     return list(res.scalars().all())

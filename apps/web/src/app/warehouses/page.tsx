@@ -10,6 +10,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
+import Link from "next/link";
 import { useState } from "react";
 import { AuthGate } from "@/components/AuthGate";
 import { ApiError, api, type TokenOut, type WarehouseOut } from "@/lib/api";
@@ -94,7 +95,17 @@ function WarehouseCard({ w }: { w: WarehouseOut }) {
   return (
     <li className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4">
       <div>
-        <h2 className="font-semibold"><bdi>{w.name}</bdi></h2>
+        <div className="flex items-start justify-between gap-2">
+          <h2 className="font-semibold"><bdi>{w.name}</bdi></h2>
+          {w.latest_dataset_id && (
+            <Link
+              href={`/datasets/${w.latest_dataset_id}`}
+              className="shrink-0 rounded-lg border border-line px-2.5 py-1 text-xs hover:border-phoenix-500"
+            >
+              {t("warehouse.openLatest")}
+            </Link>
+          )}
+        </div>
         <p className="mt-0.5 text-xs text-ink-600">
           {w.active_item_count > 0 && (
             <>

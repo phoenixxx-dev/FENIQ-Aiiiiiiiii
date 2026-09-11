@@ -72,6 +72,8 @@ class WarehouseOut(BaseModel):
     active_item_count: int
     last_sync_at: datetime | None
     created_at: datetime
+    # تحليل آخر مزامنة — زر «افتح آخر تحليل» بشاشة المستودعات
+    latest_dataset_id: str | None = None
 
 
 class TokenIn(BaseModel):
@@ -119,9 +121,10 @@ class SyncRunOut(SyncOut):
     generated_at: datetime | None
 
 
-def _wh_out(w: Warehouse) -> WarehouseOut:
+def _wh_out(w: Warehouse, latest_dataset_id: str | None = None) -> WarehouseOut:
     return WarehouseOut(id=w.id, name=w.name, active_item_count=w.active_item_count,
-                        last_sync_at=w.last_sync_at, created_at=w.created_at)
+                        last_sync_at=w.last_sync_at, created_at=w.created_at,
+                        latest_dataset_id=latest_dataset_id)
 
 
 def _run_out(r: SyncRun, duplicate: bool) -> SyncOut:
@@ -156,9 +159,11 @@ async def create_warehouse(body: WarehouseIn, user: CurrentUser, db: SessionDep,
 
 @router.get("/warehouses", response_model=list[WarehouseOut])
 async def list_warehouses(user: CurrentUser, db: SessionDep) -> list[WarehouseOut]:
-    res = await db.execute(select(Warehouse).where(Warehouse.user_id == user.id)
-                           .order_by(Warehouse.created_at))
-    return [_wh_out(w) for w in res.scalars()]
+    res = await db.execute(
+        select(Warehouse, SyncRun.dataset_id)
+        .outerjoin(SyncRun, SyncRun.id == Warehouse.last_sync_id)
+        .where(Warehouse.user_id == user.id).order_by(Warehouse.created_at))
+    return [_wh_out(w, ds_id) for w, ds_id in res.all()]
 
 
 @router.post("/warehouses/{warehouse_id}/tokens", response_model=TokenOut, status_code=201)
@@ -318,7 +323,8 @@ async def sync_catalog(request: Request, db: SessionDep,
         await db.flush()
 
         ds = Dataset(user_id=wh.user_id, name=f"كتالوج {wh.name} — {now:%Y-%m-%d %H:%M}",
-                     file_size=len(raw), content_sha256=digest, status="pending")
+                     file_size=len(raw), content_sha256=digest, status="pending",
+                     warehouse_id=wh.id)
         db.add(ds)
         await db.flush()
 

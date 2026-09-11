@@ -173,6 +173,37 @@ class TestRetriesAndChanges:
         assert r.status_code == 400 and r.json()["error_code"] == "bad_gzip"
 
 
+class TestMyFilesStaysReadable:
+    @pytest.mark.asyncio
+    async def test_only_the_latest_sync_is_listed_older_ones_still_open(self, client):
+        """مزامنة يومية = ٣٠ ملفاً شهرياً لمستودع واحد في «ملفاتي». نعرض أحدثها
+        فقط — والأقدم لا يُحذف: يبقى يُفتح برابطه (قاعدة #3)."""
+        auth, wh, _, agent = await setup_wh(client)
+        first = (await push(client, agent, catalog(BASE))).json()
+        second = (await push(client, agent, catalog({"A": 1.0, "B": 2.0, "C": 3.0}))).json()
+        async with get_sessionmaker()() as db:
+            await run_processing_job(db, first["job_id"])
+            await run_processing_job(db, second["job_id"])
+
+        listed = [d["id"] for d in (await client.get("/datasets", headers=auth)).json()]
+        assert second["dataset_id"] in listed
+        assert first["dataset_id"] not in listed, "المزامنات القديمة ما زالت تُغرق القائمة"
+        old = await client.get(f"/datasets/{first['dataset_id']}", headers=auth)
+        assert old.status_code == 200, "الملف الأقدم صار لا يُفتح — هذا حذف مقنّع"
+
+        whs = (await client.get("/v1/warehouses", headers=auth)).json()
+        assert whs[0]["latest_dataset_id"] == second["dataset_id"]
+
+    @pytest.mark.asyncio
+    async def test_manual_uploads_are_untouched(self, client):
+        auth, _, _, agent = await setup_wh(client)
+        await push(client, agent, catalog(BASE))
+        up = await client.post("/datasets", headers=auth,
+                               files={"file": ("manual.csv", b"a,b\n1,2\n3,4\n")})
+        listed = [d["id"] for d in (await client.get("/datasets", headers=auth)).json()]
+        assert up.json()["dataset_id"] in listed and len(listed) == 2
+
+
 class TestRejections:
     @pytest.mark.asyncio
     async def test_truncated_upload_changes_nothing(self, client):
